@@ -1,0 +1,111 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers ──────────────────────────────────────────────
+    function isAuth() {
+      return request.auth != null;
+    }
+    function isOwner(uid) {
+      return isAuth() && request.auth.uid == uid;
+    }
+    function isAdmin() {
+      return isAuth() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    function isNotBanned() {
+      return isAuth() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.banned != true;
+    }
+    function validString(field, min, max) {
+      return field is string && field.size() >= min && field.size() <= max;
+    }
+
+    // ── USERS ─────────────────────────────────────────────────
+    match /users/{uid} {
+      // Read: owner or admin
+      allow read: if isOwner(uid) || isAdmin();
+      // Create: only on first login (self)
+      allow create: if isOwner(uid)
+        && request.resource.data.keys().hasAll(['uid','email','role','balance','totalOrders'])
+        && request.resource.data.role == 'user'
+        && request.resource.data.balance == 0;
+      // Update: owner (limited fields) or admin (all)
+      allow update: if isAdmin()
+        || (isOwner(uid) && isNotBanned()
+          && !request.resource.data.diff(resource.data).affectedKeys()
+               .hasAny(['role', 'banned', 'balance', 'uid']));
+      // Delete: admin only
+      allow delete: if isAdmin();
+    }
+
+    // ── PRODUCTS ──────────────────────────────────────────────
+    match /products/{productId} {
+      // Read: public (only active products for non-admins)
+      allow read: if resource.data.active == true || isAdmin();
+      // Write: admin only
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ── ORDERS ───────────────────────────────────────────────
+    match /orders/{orderId} {
+      // Read: owner or admin
+      allow read: if isAdmin()
+        || (isAuth() && resource.data.uid == request.auth.uid);
+      // Create: authenticated non-banned user
+      allow create: if isAuth() && isNotBanned()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasAll(['uid','productId','productName','quantity','totalPrice','paymentMethod','status'])
+        && request.resource.data.status == 'waiting'
+        && request.resource.data.quantity > 0
+        && request.resource.data.totalPrice > 0;
+      // Update: admin only (status changes, etc.)
+      allow update: if isAdmin();
+      // Delete: admin only
+      allow delete: if isAdmin();
+    }
+
+    // ── NOTIFICATIONS ─────────────────────────────────────────
+    match /notifications/{notifId} {
+      // Read: authenticated users (global or targeted)
+      allow read: if isAuth();
+      // Create: admin only
+      allow create: if isAdmin();
+      // Update: owner can mark as read (add uid to readBy array)
+      allow update: if isAuth()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readBy']);
+      // Delete: admin only
+      allow delete: if isAdmin();
+    }
+
+    // ── CATEGORIES ───────────────────────────────────────────
+    match /categories/{catId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ── TESTIMONIALS ─────────────────────────────────────────
+    match /testimonials/{testId} {
+      allow read: if true;
+      allow create: if isAuth() && isNotBanned();
+      allow update, delete: if isAdmin();
+    }
+
+    // ── SETTINGS ─────────────────────────────────────────────
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ── PAYMENTS ─────────────────────────────────────────────
+    match /payments/{paymentId} {
+      allow read: if isAdmin()
+        || (isAuth() && resource.data.uid == request.auth.uid);
+      allow create: if isAuth() && isNotBanned()
+        && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+  }
+}
