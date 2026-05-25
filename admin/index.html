@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Admin Panel — DOOMINIKS STORE</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Shared style -->
+  <link rel="stylesheet" href="/style.css">
+
+  <style>
+    /* ── Admin Layout ──────────────────────────────────────── */
+    body { background: #050505; }
+    #adminLoadingScreen {
+      position:fixed;inset:0;z-index:9999;
+      background:#050505;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      transition:opacity 0.5s;
+    }
+    .admin-wrapper {
+      display:flex;min-height:100vh;
+    }
+
+    /* ── Sidebar ────────────────────────────────────────────── */
+    #adminSidebar {
+      width:260px;flex-shrink:0;
+      background:#0a0a0a;
+      border-right:1px solid rgba(255,0,76,0.12);
+      display:flex;flex-direction:column;
+      position:sticky;top:0;height:100vh;overflow-y:auto;
+    }
+    .sidebar-logo {
+      padding:28px 24px 20px;
+      font-family:'Poppins',sans-serif;font-size:1.1rem;font-weight:800;
+      background:linear-gradient(135deg,#ff004c,#ff4da6);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      border-bottom:1px solid rgba(255,0,76,0.1);
+    }
+    .sidebar-logo small {
+      display:block;font-size:0.6rem;font-weight:500;
+      color:#6b7280;-webkit-text-fill-color:#6b7280;letter-spacing:0.15em;text-transform:uppercase;
+      margin-top:2px;
+    }
+    .sidebar-admin-info {
+      display:flex;align-items:center;gap:10px;
+      padding:16px 20px;border-bottom:1px solid rgba(255,0,76,0.08);
+      margin-bottom:8px;
+    }
+    #sidebarAvatar { width:36px;height:36px;border-radius:50%;border:2px solid #ff004c;object-fit:cover; }
+    #sidebarName { font-size:0.82rem;font-weight:600;color:#fff; }
+    #sidebarRole { font-size:0.68rem;color:#ff4da6; }
+    .sidebar-nav { flex:1;padding:0 12px; }
+    .sidebar-section {
+      font-size:0.65rem;font-weight:700;letter-spacing:0.12em;
+      text-transform:uppercase;color:#374151;
+      padding:12px 12px 6px;
+    }
+    .sidebar-btn {
+      display:flex;align-items:center;gap:12px;
+      width:100%;padding:11px 14px;border-radius:10px;
+      background:transparent;border:none;color:#9ca3af;
+      font-size:0.85rem;font-weight:500;cursor:pointer;
+      text-align:left;transition:all 0.18s;margin-bottom:2px;
+      position:relative;
+    }
+    .sidebar-btn:hover { background:rgba(255,0,76,0.07);color:#fff; }
+    .sidebar-btn.active {
+      background:rgba(255,0,76,0.12);color:#ff4da6;
+      border:1px solid rgba(255,0,76,0.2);
+    }
+    .sidebar-btn .sb-icon { width:20px;text-align:center;font-size:1rem; }
+    .sb-badge {
+      margin-left:auto;background:#ff004c;color:#fff;
+      font-size:0.6rem;font-weight:700;min-width:18px;height:18px;
+      border-radius:99px;display:inline-flex;align-items:center;justify-content:center;padding:0 5px;
+    }
+    .sidebar-footer {
+      padding:16px 20px;border-top:1px solid rgba(255,0,76,0.1);
+    }
+    .sidebar-footer a {
+      font-size:0.8rem;color:#6b7280;display:flex;align-items:center;gap:8px;
+      transition:color 0.18s;
+    }
+    .sidebar-footer a:hover { color:#ff004c; }
+
+    /* ── Main Content ───────────────────────────────────────── */
+    #adminMain {
+      flex:1;min-width:0;
+      padding:32px;overflow-y:auto;
+    }
+    .admin-topbar {
+      display:flex;align-items:center;justify-content:space-between;
+      margin-bottom:32px;flex-wrap:wrap;gap:12px;
+    }
+    .admin-page-title {
+      font-family:'Poppins',sans-serif;font-size:1.5rem;font-weight:800;
+    }
+    .admin-topbar-right { display:flex;align-items:center;gap:12px; }
+    .btn-admin-primary {
+      padding:10px 20px;background:linear-gradient(135deg,#ff004c,#ff2d75);
+      border:none;border-radius:10px;color:#fff;font-size:0.85rem;font-weight:700;
+      cursor:pointer;transition:all 0.18s;box-shadow:0 0 16px rgba(255,0,76,0.3);
+    }
+    .btn-admin-primary:hover { transform:translateY(-2px);box-shadow:0 0 28px rgba(255,0,76,0.5); }
+    .btn-admin-secondary {
+      padding:10px 20px;background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,0,76,0.2);border-radius:10px;
+      color:#9ca3af;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.18s;
+    }
+    .btn-admin-secondary:hover { background:rgba(255,0,76,0.08);color:#fff; }
+
+    /* ── Analytics Cards ────────────────────────────────────── */
+    .analytics-grid {
+      display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+      gap:16px;margin-bottom:28px;
+    }
+    .analytics-card {
+      background:#0f0f0f;border:1px solid rgba(255,0,76,0.12);
+      border-radius:16px;padding:20px;
+      transition:all 0.25s;
+    }
+    .analytics-card:hover { border-color:rgba(255,0,76,0.3);transform:translateY(-3px);box-shadow:0 0 20px rgba(255,0,76,0.08); }
+    .ac-icon { font-size:1.8rem;margin-bottom:10px; }
+    .ac-val {
+      font-family:'Poppins',sans-serif;font-size:1.6rem;font-weight:800;
+      color:#ff4da6;line-height:1;
+    }
+    .ac-label { font-size:0.78rem;color:#6b7280;margin-top:6px; }
+    .ac-trend { font-size:0.72rem;color:#22c55e;margin-top:4px; }
+
+    /* ── Tab Content ────────────────────────────────────────── */
+    .tab-content { display:none; }
+    .tab-content.active { display:block; }
+
+    /* ── Admin Tables / Lists ───────────────────────────────── */
+    .admin-list-header {
+      display:flex;align-items:center;gap:12px;
+      margin-bottom:16px;flex-wrap:wrap;
+    }
+    .admin-search {
+      padding:10px 14px;background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,0,76,0.15);border-radius:10px;
+      color:#fff;font-size:0.85rem;outline:none;
+      transition:all 0.18s;min-width:200px;
+    }
+    .admin-search:focus { border-color:rgba(255,0,76,0.4);background:rgba(255,0,76,0.04); }
+    .admin-filter-select {
+      padding:10px 14px;background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,0,76,0.15);border-radius:10px;
+      color:#9ca3af;font-size:0.85rem;outline:none;cursor:pointer;
+    }
+    .admin-filter-select option { background:#0f0f0f; }
+
+    /* ── Order Cards ────────────────────────────────────────── */
+    .admin-order-card {
+      background:#0f0f0f;border:1px solid rgba(255,0,76,0.12);
+      border-radius:14px;padding:18px;margin-bottom:12px;
+      transition:border-color 0.2s;
+    }
+    .admin-order-card:hover { border-color:rgba(255,0,76,0.25); }
+    .aoc-header {
+      display:flex;align-items:center;gap:10px;
+      margin-bottom:12px;flex-wrap:wrap;
+    }
+    .aoc-id { font-family:'Poppins',sans-serif;font-size:0.82rem;font-weight:700;color:#ff4da6; }
+    .aoc-time { font-size:0.72rem;color:#6b7280;margin-left:auto; }
+    .aoc-body { display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px; }
+    .aoc-row { display:flex;flex-direction:column;gap:2px; }
+    .aoc-label { font-size:0.7rem;color:#6b7280;text-transform:uppercase;letter-spacing:0.08em; }
+    .aoc-row span:last-child { font-size:0.85rem;font-weight:500; }
+    .aoc-proof {
+      display:flex;align-items:center;gap:10px;
+      background:rgba(255,255,255,0.03);border:1px solid rgba(255,0,76,0.1);
+      border-radius:10px;padding:10px;margin-bottom:12px;cursor:pointer;
+      transition:all 0.18s;
+    }
+    .aoc-proof:hover { background:rgba(255,0,76,0.06); }
+    .proof-thumb { width:48px;height:48px;border-radius:8px;object-fit:cover;border:1px solid rgba(255,0,76,0.2); }
+    .aoc-proof span { font-size:0.82rem;color:#9ca3af; }
+    .aoc-actions { display:flex;gap:8px;flex-wrap:wrap; }
+    .aoc-btn {
+      padding:8px 14px;border:none;border-radius:8px;font-size:0.78rem;font-weight:600;
+      cursor:pointer;transition:all 0.18s;
+    }
+    .aoc-btn-approve { background:rgba(34,197,94,0.12);color:#4ade80;border:1px solid rgba(34,197,94,0.25); }
+    .aoc-btn-approve:hover { background:rgba(34,197,94,0.2); }
+    .aoc-btn-process { background:rgba(168,85,247,0.12);color:#c084fc;border:1px solid rgba(168,85,247,0.25); }
+    .aoc-btn-process:hover { background:rgba(168,85,247,0.2); }
+    .aoc-btn-complete { background:rgba(59,130,246,0.12);color:#60a5fa;border:1px solid rgba(59,130,246,0.25); }
+    .aoc-btn-complete:hover { background:rgba(59,130,246,0.2); }
+    .aoc-btn-cancel { background:rgba(239,68,68,0.1);color:#f87171;border:1px solid rgba(239,68,68,0.2); }
+    .aoc-btn-cancel:hover { background:rgba(239,68,68,0.18); }
+
+    /* ── Product Rows ───────────────────────────────────────── */
+    .admin-product-row {
+      display:flex;align-items:center;gap:14px;
+      background:#0f0f0f;border:1px solid rgba(255,0,76,0.1);
+      border-radius:12px;padding:14px 16px;margin-bottom:8px;
+      transition:border-color 0.2s;
+    }
+    .admin-product-row:hover { border-color:rgba(255,0,76,0.25); }
+    .ap-img { width:52px;height:52px;border-radius:8px;object-fit:cover;flex-shrink:0; }
+    .ap-info { flex:1;min-width:0; }
+    .ap-title { font-weight:600;font-size:0.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .ap-meta { font-size:0.73rem;color:#6b7280;margin-top:2px; }
+    .ap-price { font-weight:700;color:#ff4da6;font-size:0.88rem;white-space:nowrap; }
+    .ap-stock { font-size:0.82rem;font-weight:600;min-width:40px;text-align:center; }
+    .ap-stock.low { color:#f59e0b; }
+    .toggle-pill { cursor:pointer;font-size:1.1rem;transition:transform 0.18s; }
+    .toggle-pill:hover { transform:scale(1.2); }
+    .ap-actions { display:flex;gap:6px; }
+    .ap-btn-edit,.ap-btn-del {
+      width:32px;height:32px;border:none;border-radius:8px;
+      font-size:0.9rem;cursor:pointer;transition:all 0.18s;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .ap-btn-edit { background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2); }
+    .ap-btn-edit:hover { background:rgba(59,130,246,0.2); }
+    .ap-btn-del { background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2); }
+    .ap-btn-del:hover { background:rgba(239,68,68,0.2); }
+
+    /* ── User Rows ──────────────────────────────────────────── */
+    .admin-user-row {
+      display:flex;align-items:center;gap:14px;
+      background:#0f0f0f;border:1px solid rgba(255,0,76,0.1);
+      border-radius:12px;padding:14px 16px;margin-bottom:8px;
+      transition:border-color 0.2s;
+    }
+    .admin-user-row:hover { border-color:rgba(255,0,76,0.25); }
+    .au-avatar { width:40px;height:40px;border-radius:50%;border:2px solid rgba(255,0,76,0.3);object-fit:cover;flex-shrink:0; }
+    .au-info { flex:1;min-width:0; }
+    .au-name { font-weight:600;font-size:0.88rem; }
+    .au-email { font-size:0.73rem;color:#6b7280; }
+    .au-role { font-size:0.78rem;font-weight:600;white-space:nowrap; }
+    .role-admin { color:#fbbf24; }
+    .role-user  { color:#6b7280; }
+    .au-orders  { font-size:0.78rem;color:#9ca3af;white-space:nowrap; }
+    .au-balance { font-size:0.82rem;font-weight:600;color:#ff4da6;white-space:nowrap; }
+    .au-actions { display:flex;gap:6px; }
+    .au-btn-promote,.au-btn-demote,.au-btn-ban {
+      width:30px;height:30px;border:none;border-radius:8px;
+      font-size:0.85rem;cursor:pointer;transition:all 0.18s;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .au-btn-promote { background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.2); }
+    .au-btn-promote:hover { background:rgba(251,191,36,0.2); }
+    .au-btn-demote  { background:rgba(107,114,128,0.1);border:1px solid rgba(107,114,128,0.2); }
+    .au-btn-ban     { background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2); }
+    .au-btn-ban.banned { background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.2); }
+
+    /* ── Recent Activity ────────────────────────────────────── */
+    .activity-item {
+      display:flex;align-items:flex-start;gap:12px;
+      padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.04);
+    }
+    .activity-icon { font-size:1.2rem;flex-shrink:0; }
+    .activity-body { flex:1; }
+    .activity-title { font-size:0.83rem;line-height:1.4; }
+    .activity-title strong { color:#fff; }
+    .activity-title em { color:#ff4da6;font-style:normal; }
+    .activity-meta { font-size:0.72rem;color:#6b7280;margin-top:3px; }
+
+    /* ── Product Form ───────────────────────────────────────── */
+    .form-grid { display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px; }
+    .form-group { display:flex;flex-direction:column;gap:6px; }
+    .form-group.full { grid-column:1/-1; }
+    .form-label { font-size:0.78rem;font-weight:600;color:#9ca3af; }
+    .form-input {
+      padding:11px 14px;background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,0,76,0.15);border-radius:10px;
+      color:#fff;font-size:0.875rem;outline:none;
+      transition:all 0.18s;
+    }
+    .form-input:focus { border-color:rgba(255,0,76,0.45);background:rgba(255,0,76,0.04); }
+    .form-input::placeholder { color:#374151; }
+    .form-textarea {
+      padding:11px 14px;background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,0,76,0.15);border-radius:10px;
+      color:#fff;font-size:0.875rem;outline:none;resize:vertical;min-height:80px;
+    }
+    .form-textarea:focus { border-color:rgba(255,0,76,0.45); }
+    .form-checkbox-row { display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px; }
+    .form-checkbox-label {
+      display:flex;align-items:center;gap:8px;
+      font-size:0.83rem;color:#9ca3af;cursor:pointer;
+    }
+    .form-checkbox-label input[type="checkbox"] { accent-color:#ff004c;width:16px;height:16px;cursor:pointer; }
+
+    /* ── Broadcast ──────────────────────────────────────────── */
+    .broadcast-card {
+      background:#0f0f0f;border:1px solid rgba(255,0,76,0.15);
+      border-radius:16px;padding:24px;max-width:600px;
+    }
+    .broadcast-card .form-input,
+    .broadcast-card .form-textarea { width:100%;margin-bottom:12px; }
+
+    /* ── Settings ───────────────────────────────────────────── */
+    .settings-card {
+      background:#0f0f0f;border:1px solid rgba(255,0,76,0.12);
+      border-radius:16px;padding:24px;max-width:600px;
+      margin-bottom:20px;
+    }
+    .settings-card-title { font-family:'Poppins',sans-serif;font-weight:700;font-size:0.95rem;margin-bottom:16px;color:#fff; }
+
+    /* ── Modal (Admin) ──────────────────────────────────────── */
+    #productModal .modal-inner { max-width:600px; }
+
+    /* ── Misc ───────────────────────────────────────────────── */
+    .admin-empty,.admin-loading {
+      text-align:center;padding:40px;color:#6b7280;font-size:0.875rem;
+    }
+    .admin-section-title {
+      font-family:'Poppins',sans-serif;font-weight:700;font-size:1rem;
+      color:#fff;margin-bottom:16px;
+    }
+    .two-col-grid { display:grid;grid-template-columns:1fr 1fr;gap:20px; }
+    .full-card {
+      background:#0f0f0f;border:1px solid rgba(255,0,76,0.12);
+      border-radius:16px;padding:20px;
+    }
+
+    /* ── Access Denied ──────────────────────────────────────── */
+    #accessDenied {
+      display:none;
+      position:fixed;inset:0;z-index:9999;
+      background:#050505;
+      flex-direction:column;align-items:center;justify-content:center;
+      text-align:center;gap:16px;
+    }
+    #accessDenied .denied-icon { font-size:4rem; }
+    #accessDenied h2 { font-family:'Poppins',sans-serif;font-size:1.5rem;font-weight:800;color:#ff004c; }
+
+    /* ── Mobile Sidebar Toggle ──────────────────────────────── */
+    #sidebarToggle {
+      display:none;position:fixed;bottom:20px;left:20px;z-index:900;
+      width:48px;height:48px;border-radius:50%;
+      background:linear-gradient(135deg,#ff004c,#ff2d75);
+      border:none;color:#fff;font-size:1.3rem;cursor:pointer;
+      box-shadow:0 4px 16px rgba(255,0,76,0.4);
+    }
+    .filter-tabs {
+      display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;
+    }
+    .filter-tab {
+      padding:6px 14px;border-radius:99px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,0,76,0.12);
+      color:#9ca3af;font-size:0.78rem;font-weight:600;cursor:pointer;
+      transition:all 0.18s;
+    }
+    .filter-tab:hover,.filter-tab.active {
+      background:rgba(255,0,76,0.1);
+      border-color:rgba(255,0,76,0.35);
+      color:#ff4da6;
+    }
+
+    @media(max-width:768px){
+      #adminSidebar { position:fixed;left:-260px;z-index:800;transition:left 0.3s;top:0;bottom:0; }
+      #adminSidebar.open { left:0; }
+      #adminMain { padding:20px 16px; }
+      #sidebarToggle { display:flex;align-items:center;justify-content:center; }
+      .two-col-grid,.form-grid,.aoc-body { grid-template-columns:1fr; }
+      .analytics-grid { grid-template-columns:1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Admin Loading -->
+<div id="adminLoadingScreen">
+  <div style="font-family:'Poppins',sans-serif;font-size:1.8rem;font-weight:800;background:linear-gradient(135deg,#ff004c,#ff4da6);-webkit-background-clip:text;-webkit-text-fill-color:transparent">DOOMINIKS</div>
+  <div style="font-size:0.7rem;color:#ff004c;letter-spacing:0.3em;margin-top:2px;opacity:0.7">ADMIN PANEL</div>
+  <div class="loading-bar" style="margin-top:20px"><div class="loading-bar-fill"></div></div>
+</div>
+
+<!-- Access Denied -->
+<div id="accessDenied">
+  <div class="denied-icon">🚫</div>
+  <h2>Akses Ditolak</h2>
+  <p style="color:#6b7280;font-size:0.9rem">Kamu tidak memiliki izin admin.<br>Login dengan akun admin yang valid.</p>
+  <a href="/" style="padding:12px 28px;background:linear-gradient(135deg,#ff004c,#ff2d75);border-radius:10px;color:#fff;font-weight:700;font-size:0.875rem;text-decoration:none">Kembali ke Beranda</a>
+</div>
+
+<!-- ============================================================ -->
+<!-- ADMIN WRAPPER                                                 -->
+<!-- ============================================================ -->
+<div class="admin-wrapper" id="adminWrapper" style="display:none">
+
+  <!-- ── SIDEBAR ───────────────────────────────────────────── -->
+  <aside id="adminSidebar">
+    <div class="sidebar-logo">
+      👑 DOOMINIKS
+      <small>Admin Panel v2.0</small>
+    </div>
+
+    <div class="sidebar-admin-info">
+      <img id="sidebarAvatar" src="https://ui-avatars.com/api/?name=A&background=ff004c&color=fff" alt="Admin">
+      <div>
+        <div id="sidebarName">Admin</div>
+        <div id="sidebarRole">👑 Administrator</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Main</div>
+      <button class="sidebar-btn active" data-tab="dashboard" onclick="switchTab('dashboard',this)">
+        <span class="sb-icon">📊</span> Dashboard
+      </button>
+      <button class="sidebar-btn" data-tab="orders" onclick="switchTab('orders',this)">
+        <span class="sb-icon">📦</span> Pesanan
+        <span class="sb-badge" id="waitingOrdersBadge" style="display:none">0</span>
+      </button>
+
+      <div class="sidebar-section">Konten</div>
+      <button class="sidebar-btn" data-tab="products" onclick="switchTab('products',this)">
+        <span class="sb-icon">🎮</span> Produk
+      </button>
+      <button class="sidebar-btn" data-tab="users" onclick="switchTab('users',this)">
+        <span class="sb-icon">👥</span> Pengguna
+      </button>
+
+      <div class="sidebar-section">Tools</div>
+      <button class="sidebar-btn" data-tab="broadcast" onclick="switchTab('broadcast',this)">
+        <span class="sb-icon">📢</span> Broadcast
+      </button>
+      <button class="sidebar-btn" data-tab="settings" onclick="switchTab('settings',this)">
+        <span class="sb-icon">⚙️</span> Pengaturan
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="/" target="_blank">🌐 Lihat Toko</a>
+      <a href="#" onclick="adminLogout()" style="margin-top:10px">🚪 Keluar</a>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ──────────────────────────────────────────────── -->
+  <main id="adminMain">
+
+    <!-- ── DASHBOARD TAB ─────────────────────────────────── -->
+    <div class="tab-content active" id="tab-dashboard">
+      <div class="admin-topbar">
+        <div>
+          <div class="admin-page-title">📊 Dashboard</div>
+          <div style="font-size:0.8rem;color:#6b7280;margin-top:2px" id="adminGreeting">Selamat datang!</div>
+        </div>
+        <div class="admin-topbar-right">
+          <button class="btn-admin-secondary" onclick="loadAnalytics()">🔄 Refresh</button>
+          <button class="btn-admin-primary" onclick="switchTab('orders',document.querySelector('[data-tab=orders]'))">📦 Kelola Pesanan</button>
+        </div>
+      </div>
+
+      <!-- Analytics Cards -->
+      <div class="analytics-grid">
+        <div class="analytics-card">
+          <div class="ac-icon">👥</div>
+          <div class="ac-val" id="statTotalUsers">—</div>
+          <div class="ac-label">Total Pengguna</div>
+          <div class="ac-trend">↑ Aktif</div>
+        </div>
+        <div class="analytics-card">
+          <div class="ac-icon">📦</div>
+          <div class="ac-val" id="statTotalOrders">—</div>
+          <div class="ac-label">Total Pesanan</div>
+        </div>
+        <div class="analytics-card">
+          <div class="ac-icon">🎮</div>
+          <div class="ac-val" id="statTotalProducts">—</div>
+          <div class="ac-label">Total Produk</div>
+        </div>
+        <div class="analytics-card">
+          <div class="ac-icon">💰</div>
+          <div class="ac-val" id="statRevenue">—</div>
+          <div class="ac-label">Total Revenue</div>
+        </div>
+      </div>
+
+      <!-- Recent Activity + Quick Actions -->
+      <div class="two-col-grid">
+        <div class="full-card">
+          <div class="admin-section-title">⚡ Aktivitas Terbaru</div>
+          <div id="recentActivity">
+            <div class="admin-loading">Memuat aktivitas...</div>
+          </div>
+        </div>
+        <div>
+          <div class="full-card" style="margin-bottom:16px">
+            <div class="admin-section-title">🚀 Aksi Cepat</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <button class="btn-admin-primary" onclick="switchTab('products',document.querySelector('[data-tab=products]'));openAddProductModal()">➕ Tambah Produk Baru</button>
+              <button class="btn-admin-secondary" onclick="switchTab('orders',document.querySelector('[data-tab=orders]'))">📦 Lihat Pesanan Pending</button>
+              <button class="btn-admin-secondary" onclick="switchTab('broadcast',document.querySelector('[data-tab=broadcast]'))">📢 Kirim Broadcast</button>
+              <button class="btn-admin-secondary" onclick="switchTab('users',document.querySelector('[data-tab=users]'))">👥 Kelola Pengguna</button>
+            </div>
+          </div>
+          <div class="full-card">
+            <div class="admin-section-title">📡 Status Sistem</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;justify-content:space-between;font-size:0.83rem">
+                <span style="color:#9ca3af">🔥 Firebase</span>
+                <span style="color:#22c55e;font-weight:600">● Online</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:0.83rem">
+                <span style="color:#9ca3af">🗄️ Firestore</span>
+                <span style="color:#22c55e;font-weight:600">● Active</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:0.83rem">
+                <span style="color:#9ca3af">🔒 Auth</span>
+                <span style="color:#22c55e;font-weight:600">● Secured</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:0.83rem">
+                <span style="color:#9ca3af">🛒 Store</span>
+                <span style="color:#22c55e;font-weight:600" id="storeStatusBadge">● Open</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ORDERS TAB ─────────────────────────────────────── -->
+    <div class="tab-content" id="tab-orders">
+      <div class="admin-topbar">
+        <div class="admin-page-title">📦 Manajemen Pesanan</div>
+        <button class="btn-admin-secondary" onclick="initOrdersTab()">🔄 Refresh</button>
+      </div>
+
+      <div class="filter-tabs">
+        <button class="filter-tab active" onclick="filterOrders('',this)">Semua</button>
+        <button class="filter-tab" onclick="filterOrders('waiting',this)">⏳ Menunggu</button>
+        <button class="filter-tab" onclick="filterOrders('paid',this)">💳 Dibayar</button>
+        <button class="filter-tab" onclick="filterOrders('processing',this)">⚙️ Diproses</button>
+        <button class="filter-tab" onclick="filterOrders('completed',this)">✅ Selesai</button>
+        <button class="filter-tab" onclick="filterOrders('cancelled',this)">❌ Dibatalkan</button>
+      </div>
+
+      <div class="admin-list-header">
+        <input type="text" id="orderSearchInput" class="admin-search" placeholder="🔍 Cari Order ID, nama pembeli..." oninput="searchOrders(this.value)">
+      </div>
+
+      <div id="adminOrdersList">
+        <div class="admin-loading">Memuat pesanan...</div>
+      </div>
+    </div>
+
+    <!-- ── PRODUCTS TAB ───────────────────────────────────── -->
+    <div class="tab-content" id="tab-products">
+      <div class="admin-topbar">
+        <div class="admin-page-title">🎮 Manajemen Produk</div>
+        <button class="btn-admin-primary" onclick="openAddProductModal()">➕ Tambah Produk</button>
+      </div>
+
+      <div class="admin-list-header">
+        <input type="text" class="admin-search" placeholder="🔍 Cari produk..." oninput="filterProducts(this.value)">
+      </div>
+
+      <div id="adminProductsList">
+        <div class="admin-loading">Memuat produk...</div>
+      </div>
+    </div>
+
+    <!-- ── USERS TAB ──────────────────────────────────────── -->
+    <div class="tab-content" id="tab-users">
+      <div class="admin-topbar">
+        <div class="admin-page-title">👥 Manajemen Pengguna</div>
+      </div>
+      <div class="admin-list-header">
+        <input type="text" class="admin-search" placeholder="🔍 Cari nama atau email...">
+      </div>
+      <div id="adminUsersList">
+        <div class="admin-loading">Memuat pengguna...</div>
+      </div>
+    </div>
+
+    <!-- ── BROADCAST TAB ──────────────────────────────────── -->
+    <div class="tab-content" id="tab-broadcast">
+      <div class="admin-page-title" style="margin-bottom:24px">📢 Broadcast Notifikasi</div>
+      <div class="broadcast-card">
+        <div style="font-family:'Poppins',sans-serif;font-weight:700;margin-bottom:16px">Kirim ke Semua Pengguna</div>
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label">Tipe Notifikasi</label>
+          <select id="broadcastType" class="form-input">
+            <option value="promo">🎉 Promo</option>
+            <option value="info">📢 Pengumuman</option>
+            <option value="order">📦 Order Update</option>
+            <option value="system">⚙️ Sistem</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label">Judul Notifikasi</label>
+          <input type="text" id="broadcastTitle" class="form-input" placeholder="Contoh: Flash Sale Dimulai! 🔥">
+        </div>
+        <div class="form-group" style="margin-bottom:16px">
+          <label class="form-label">Isi Pesan</label>
+          <textarea id="broadcastMessage" class="form-textarea" placeholder="Tulis pesan broadcast kamu di sini..."></textarea>
+        </div>
+        <button class="btn-admin-primary" onclick="broadcastNotification()" style="width:100%">📢 Kirim Sekarang</button>
+      </div>
+    </div>
+
+    <!-- ── SETTINGS TAB ───────────────────────────────────── -->
+    <div class="tab-content" id="tab-settings">
+      <div class="admin-page-title" style="margin-bottom:24px">⚙️ Pengaturan Toko</div>
+
+      <div class="settings-card">
+        <div class="settings-card-title">🏪 Info Toko</div>
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label">Nama Toko</label>
+          <input type="text" id="settingStoreName" class="form-input" placeholder="Doominiks Store">
+        </div>
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label">Nomor WhatsApp CS</label>
+          <input type="text" id="settingWhatsapp" class="form-input" placeholder="628123456789">
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-card-title">🔧 Maintenance Mode</div>
+        <div style="margin-bottom:12px">
+          <label class="form-checkbox-label">
+            <input type="checkbox" id="settingMaintenance">
+            Aktifkan Maintenance Mode
+          </label>
+          <p style="font-size:0.78rem;color:#6b7280;margin-top:6px">Saat aktif, toko tidak dapat diakses oleh pengguna.</p>
+        </div>
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label">Pesan Maintenance</label>
+          <textarea id="settingMaintenanceMsg" class="form-textarea" placeholder="Toko sedang dalam pemeliharaan. Akan kembali segera!"></textarea>
+        </div>
+        <button id="saveSettingsBtn" class="btn-admin-primary" onclick="saveSettings()">💾 Simpan Pengaturan</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Sidebar Mobile Toggle -->
+<button id="sidebarToggle" onclick="document.getElementById('adminSidebar').classList.toggle('open')">☰</button>
+
+<!-- Proof View Modal -->
+<div class="modal-overlay" id="proofViewModal" onclick="this.classList.remove('modal-active')">
+  <div class="modal-inner" style="background:#0a0a0a;max-width:480px">
+    <div class="modal-header">
+      <h3 class="modal-title">🧾 Bukti Pembayaran</h3>
+      <button class="modal-close" onclick="document.getElementById('proofViewModal').classList.remove('modal-active')">×</button>
+    </div>
+    <img id="proofViewImg" src="" alt="Bukti" style="width:100%;border-radius:12px;border:1px solid rgba(255,0,76,0.2)">
+  </div>
+</div>
+
+<!-- Product Modal -->
+<div class="modal-overlay" id="productModal" onclick="if(event.target===this)this.classList.remove('modal-active')">
+  <div class="modal-inner" style="max-width:600px">
+    <div class="modal-header">
+      <h3 class="modal-title" id="productModalTitle">➕ Tambah Produk</h3>
+      <button class="modal-close" onclick="document.getElementById('productModal').classList.remove('modal-active')">×</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label class="form-label">Judul Produk *</label>
+        <input type="text" id="pTitle" class="form-input" placeholder="Contoh: Mobile Legends 86 Diamonds">
+      </div>
+      <div class="form-group full">
+        <label class="form-label">Deskripsi</label>
+        <textarea id="pDesc" class="form-textarea" placeholder="Deskripsi singkat produk..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Harga (Rp) *</label>
+        <input type="number" id="pPrice" class="form-input" placeholder="19000">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Harga Asli (coret)</label>
+        <input type="number" id="pOrigPrice" class="form-input" placeholder="25000">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Stok</label>
+        <input type="number" id="pStock" class="form-input" placeholder="999">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Kategori</label>
+        <select id="pCategory" class="form-input">
+          <option value="">Pilih kategori</option>
+          <option value="Mobile Legends">Mobile Legends</option>
+          <option value="Free Fire">Free Fire</option>
+          <option value="PUBG">PUBG Mobile</option>
+          <option value="Genshin">Genshin Impact</option>
+          <option value="Valorant">Valorant</option>
+          <option value="Streaming">Streaming</option>
+          <option value="Voucher">Voucher</option>
+          <option value="Other">Lainnya</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label class="form-label">URL Gambar</label>
+        <input type="text" id="pImage" class="form-input" placeholder="https://...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Badge</label>
+        <select id="pBadge" class="form-input">
+          <option value="">Tidak ada</option>
+          <option value="HOT">🔥 HOT</option>
+          <option value="NEW">✨ NEW</option>
+          <option value="SALE">💥 SALE</option>
+          <option value="LIMITED">⚡ LIMITED</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-checkbox-row">
+      <label class="form-checkbox-label"><input type="checkbox" id="pActive" checked> Aktif</label>
+      <label class="form-checkbox-label"><input type="checkbox" id="pFeatured"> Featured</label>
+      <label class="form-checkbox-label"><input type="checkbox" id="pPopular"> Popular</label>
+    </div>
+    <button id="productSubmitBtn" class="btn-admin-primary" onclick="submitProductForm()" style="width:100%">💾 Simpan Produk</button>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toastContainer"></div>
+
+<script type="module">
+  import { auth, db } from '/firebase.js';
+  import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { loadAnalytics, initOrdersTab, initProductsTab, initUsersTab, loadSettings } from '/admin.js';
+  import { showToast } from '/ui.js';
+
+  // ── Auth Guard ───────────────────────────────────────────
+  onAuthStateChanged(auth, async (user) => {
+    const loadingScreen = document.getElementById('adminLoadingScreen');
+    if (!user) {
+      loadingScreen.style.opacity = '0';
+      setTimeout(() => {
+        loadingScreen.style.display = 'none';
+        document.getElementById('accessDenied').style.display = 'flex';
+      }, 500);
+      return;
+    }
+
+    // Check admin role
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    if (!snap.exists() || snap.data().role !== 'admin') {
+      loadingScreen.style.opacity = '0';
+      setTimeout(() => {
+        loadingScreen.style.display = 'none';
+        document.getElementById('accessDenied').style.display = 'flex';
+      }, 500);
+      return;
+    }
+
+    // Set sidebar info
+    document.getElementById('sidebarAvatar').src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'A')}&background=ff004c&color=fff`;
+    document.getElementById('sidebarName').textContent = user.displayName || 'Admin';
+    const h = new Date().getHours();
+    document.getElementById('adminGreeting').textContent =
+      `Halo, ${user.displayName?.split(' ')[0] || 'Admin'}! ${h < 12 ? '☀️ Selamat pagi' : h < 17 ? '🌤️ Selamat siang' : '🌙 Selamat malam'}`;
+
+    // Show panel
+    document.getElementById('adminWrapper').style.display = 'flex';
+    loadingScreen.style.opacity = '0';
+    setTimeout(() => loadingScreen.style.display = 'none', 500);
+
+    // Load initial data
+    await loadAnalytics();
+
+    // Register globals
+    window.loadAnalytics = loadAnalytics;
+    window.initOrdersTab = initOrdersTab;
+    window.adminLogout = () => signOut(auth).then(() => window.location.href = '/');
+  });
+
+  // ── Tab Switching ─────────────────────────────────────────
+  window.switchTab = (tabId, btn) => {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + tabId)?.classList.add('active');
+    if (btn) btn.classList.add('active');
+
+    // Close mobile sidebar
+    document.getElementById('adminSidebar').classList.remove('open');
+
+    // Load tab data
+    if (tabId === 'orders')    initOrdersTab();
+    if (tabId === 'products')  initProductsTab();
+    if (tabId === 'users')     initUsersTab();
+    if (tabId === 'settings')  loadSettings();
+    if (tabId === 'dashboard') loadAnalytics();
+  };
+
+  // ── Order Filters ─────────────────────────────────────────
+  window.filterOrders = (status, btn) => {
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    initOrdersTab(status);
+  };
+
+  window.searchOrders = (val) => {
+    // Re-render with search filter applied in renderAdminOrders
+    initOrdersTab();
+  };
+
+  window.filterProducts = (val) => {
+    initProductsTab();
+  };
+</script>
+</body>
+</html>
