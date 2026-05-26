@@ -79,10 +79,9 @@ export function renderSkeletons(containerId, count = 6) {
 
 // ── Modal System ─────────────────────────────────────────────
 export function openModal(id) {
-  const modal = document.getElementById(id);
-  if (!modal) return;
-  modal.classList.add('modal-active');
+  document.getElementById(id)?.classList.add('modal-active');
   document.body.style.overflow = 'hidden';
+}
   const inner = modal.querySelector('.modal-inner');
   if (inner) { inner.style.transform = 'scale(0.85)'; inner.style.opacity = '0'; }
   requestAnimationFrame(() => {
@@ -91,9 +90,7 @@ export function openModal(id) {
 }
 
 export function closeModal(id) {
-  const modal = document.getElementById(id);
-  if (!modal) return;
-  modal.classList.remove('modal-active');
+  document.getElementById(id)?.classList.remove('modal-active');
   document.body.style.overflow = '';
 }
 
