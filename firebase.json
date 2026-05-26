@@ -8,31 +8,26 @@
       ".gitignore",
       "README.md",
       "**/.*",
-      "**/node_modules/**",
-      "firebase-debug.log"
+      "**/node_modules/**"
     ],
     "rewrites": [
-      {
-        "source": "/admin/**",
-        "destination": "/admin/index.html"
-      },
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
+      { "source": "/admin/**", "destination": "/admin/index.html" },
+      { "source": "**", "destination": "/index.html" }
     ],
     "headers": [
+      {
+        "source": "**",
+        "headers": [
+          { "key": "Cross-Origin-Opener-Policy", "value": "same-origin-allow-popups" },
+          { "key": "Cross-Origin-Embedder-Policy", "value": "unsafe-none" },
+          { "key": "X-Content-Type-Options", "value": "nosniff" }
+        ]
+      },
       {
         "source": "**/*.js",
         "headers": [
           { "key": "Content-Type", "value": "application/javascript" },
-          { "key": "Cache-Control", "value": "public, max-age=3600" }
-        ]
-      },
-      {
-        "source": "**/*.css",
-        "headers": [
-          { "key": "Cache-Control", "value": "public, max-age=3600" }
+          { "key": "Cache-Control", "value": "no-cache" }
         ]
       },
       {
@@ -40,13 +35,6 @@
         "headers": [
           { "key": "Cache-Control", "value": "no-cache" },
           { "key": "Service-Worker-Allowed", "value": "/" }
-        ]
-      },
-      {
-        "source": "**",
-        "headers": [
-          { "key": "X-Frame-Options", "value": "DENY" },
-          { "key": "X-Content-Type-Options", "value": "nosniff" }
         ]
       }
     ],
