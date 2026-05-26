@@ -452,7 +452,25 @@
     document.getElementById('notifDropdown')?.classList.remove('open');
   });
 </script>
-
+<script>
+// Modal Fix
+function openAuthModal() {
+  document.getElementById('authModal').classList.add('modal-active');
+  document.body.style.overflow = 'hidden';
+}
+function closeAuthModal() {
+  document.getElementById('authModal').classList.remove('modal-active');
+  document.body.style.overflow = '';
+}
+function openModal(id) {
+  document.getElementById(id).classList.add('modal-active');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('modal-active');
+  document.body.style.overflow = '';
+}
+</script>
 <!-- ── MAIN APP ────────────────────────────────────────── -->
 <script type="module" src="/app.js"></script>
 
