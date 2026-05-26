@@ -95,9 +95,14 @@ export function initAuthObserver(onLogin, onLogout) {
 
 export const isAdmin = () => currentUserData?.role === 'admin';
 
-export function openAuthModal()  { document.getElementById('authModal')?.classList.add('active'); }
-export function closeAuthModal() { document.getElementById('authModal')?.classList.remove('active'); }
-
+export function openAuthModal()  { 
+  document.getElementById('authModal')?.classList.add('modal-active'); 
+  document.body.style.overflow = 'hidden';
+}
+export function closeAuthModal() { 
+  document.getElementById('authModal')?.classList.remove('modal-active');
+  document.body.style.overflow = '';
+}
 function showAuthLoading(state) {
   const btn = document.getElementById('googleLoginBtn');
   if (!btn) return;
