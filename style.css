@@ -643,6 +643,7 @@ footer {
   padding: 0;
 }
 .modal-overlay.modal-active { display: flex; }
+.modal-overlay.active { display: flex; }
 .modal-inner {
   background: var(--bg-deep);
   border: 1px solid var(--border);
