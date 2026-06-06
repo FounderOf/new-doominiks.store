@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>VaultStore &mdash; Top Up Game Terpercaya</title>
   <meta name="description" content="Top up game murah, cepat, dan terpercaya. Mobile Legends, Free Fire, PUBG, Genshin Impact & lebih banyak lagi." />
   <link rel="stylesheet" href="css/style.css" />
@@ -61,9 +61,11 @@
       display: flex; gap: 16px;
       animation: slideLoop 30s linear infinite;
       width: max-content;
+      touch-action: pan-y;
+      pointer-events: none;
     }
     .review-slide-track:hover { animation-play-state: paused; }
-    .review-card { min-width: 300px; max-width: 300px; flex-shrink: 0; }
+    .review-card { min-width: 300px; max-width: 300px; flex-shrink: 0; pointer-events: all; }
   </style>
 </head>
 <body>
@@ -242,7 +244,7 @@
 <!-- STATS BAR -->
 <div style="background:var(--bg-deep);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:32px 0;">
   <div class="container">
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:24px;" id="stat-cards">
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;" id="stat-cards" class="stat-cards-grid">
       <div class="stat-card">
         <div class="stat-icon gold">&#9670;</div>
         <div><div class="stat-label">Total Transaksi</div><div class="stat-value" id="sc-orders">...</div></div>
@@ -523,7 +525,7 @@ function buildReviews(reviews) {
 // Load products from Firestore
 async function loadFeaturedProducts() {
   try {
-    const snap = await db.collection("products").where("active", "==", true).orderBy("sortOrder").limit(8).get();
+    const snap = await db.collection("products").where("active", "==", true).limit(8).get();
     const grid = document.getElementById("products-grid");
     if (snap.empty) {
       grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">&#9632;</div><h4>Belum ada produk</h4><p>Produk akan segera hadir.</p></div>`;
