@@ -3,12 +3,12 @@
 // Ganti dengan config Firebase project kamu
 // ============================================================
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyAL-_NogoNyUWkLEYj6PXdqD9-SjHsusu0",
+  authDomain: "doominiks-new-store.firebaseapp.com",
+  projectId: "doominiks-new-store",
+  storageBucket: "doominiks-new-store.firebasestorage.app",
+  messagingSenderId: "369118847145",
+  appId: "1:369118847145:web:33b56aae2ee031eb8489b8"
 };
 
 // Owner UIDs — tambahkan UID kamu setelah login pertama
