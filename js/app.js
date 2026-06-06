@@ -2,41 +2,6 @@
 // MAIN APP UTILITIES
 // ============================================================
 
-// ---- Owner UIDs ----
-// Tambahkan UID owner kamu di sini (dari Firebase Authentication)
-const OWNER_UIDS = window.OWNER_UIDS || [];
-
-function isOwner(uid) {
-  return OWNER_UIDS.includes(uid);
-}
-
-// ---- Format Currency ----
-function formatIDR(amount) {
-  if (typeof amount !== "number" || isNaN(amount)) return "Rp 0";
-  return "Rp " + Math.floor(amount).toLocaleString("id-ID");
-}
-
-// ---- Format Date ----
-function formatDate(val) {
-  if (!val) return "-";
-  let date;
-  if (val && typeof val.toDate === "function") {
-    date = val.toDate();
-  } else if (val && typeof val.toMillis === "function") {
-    date = new Date(val.toMillis());
-  } else if (val instanceof Date) {
-    date = val;
-  } else if (typeof val === "number") {
-    date = new Date(val);
-  } else {
-    return "-";
-  }
-  return date.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
-}
-
-// ---- Google Auth Provider ----
-const googleProvider = new firebase.auth.GoogleAuthProvider();
-
 // ---- Toast Notifications ----
 function toast(message, type = "info", duration = 3500) {
   const container = document.getElementById("toast-container");
@@ -61,7 +26,6 @@ function closeModal(id) {
   const overlay = document.getElementById(id);
   if (overlay) { overlay.classList.remove("open"); document.body.style.overflow = ""; }
 }
-// Close on overlay click
 document.addEventListener("click", (e) => {
   if (e.target.classList.contains("modal-overlay")) {
     e.target.classList.remove("open");
@@ -77,7 +41,21 @@ function hideLoader() {
 
 // ---- Auth State ----
 let currentUser = null;
+let _authReady = false;
+
+// Fallback: kalau Firebase tidak respond dalam 6 detik, hide loader paksa
+const _loaderTimeout = setTimeout(() => {
+  if (!_authReady) {
+    _authReady = true;
+    hideLoader();
+    if (typeof onAuthReady === "function") onAuthReady(null);
+  }
+}, 6000);
+
 auth.onAuthStateChanged(async (user) => {
+  if (_authReady) return;
+  _authReady = true;
+  clearTimeout(_loaderTimeout);
   currentUser = user;
   updateNavAuth(user);
   if (typeof onAuthReady === "function") onAuthReady(user);
@@ -110,7 +88,6 @@ async function signInWithGoogle() {
   try {
     const result = await auth.signInWithPopup(googleProvider);
     const user = result.user;
-    // Upsert user document
     await db.collection("users").doc(user.uid).set({
       displayName: user.displayName,
       email: user.email,
