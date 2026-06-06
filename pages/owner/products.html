@@ -8,7 +8,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
   <style>
     .item-row {
       display: flex; align-items: center; gap: 10px;
@@ -472,7 +471,6 @@ async function saveProduct(e) {
 
 // ---- Image Upload ----
 let uploadedImageUrl = null;
-const storage = firebase.storage ? firebase.storage() : null;
 
 function handleImageSelect(event) {
   const file = event.target.files[0];
@@ -521,59 +519,63 @@ function validateAndPreviewImage(file) {
   uploadImageToStorage(file);
 }
 
+// ============================================================
+// CLOUDINARY CONFIG
+// Ganti dengan cloud_name dan upload_preset kamu
+// ============================================================
+const CLOUDINARY_CLOUD_NAME = "dnpvgpqka";    // ganti ini
+const CLOUDINARY_UPLOAD_PRESET = "vaultstore"; // ganti ini
+
 async function uploadImageToStorage(file) {
-  if (!storage) {
-    // Fallback: use base64 data URL if storage not available
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      document.getElementById("f-img-url").value = e.target.result;
-      document.getElementById("img-url-display").textContent = "Gambar siap (mode lokal)";
-      toast("Gambar siap digunakan.", "success");
-    };
-    reader.readAsDataURL(file);
-    return;
-  }
   const progress = document.getElementById("upload-progress");
   const bar = document.getElementById("upload-progress-bar");
   const display = document.getElementById("img-url-display");
   progress.style.display = "block";
-  bar.style.width = "0%";
-  display.textContent = "Mengupload...";
+  bar.style.width = "10%";
+  display.textContent = "Mengupload ke Cloudinary...";
+
   try {
-    const ext = file.name.split(".").pop();
-    const filename = `products/${Date.now()}_${Math.random().toString(36).substr(2,8)}.${ext}`;
-    const ref = storage.ref(filename);
-    const task = ref.put(file);
-    task.on("state_changed",
-      (snap) => {
-        const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
-        bar.style.width = pct + "%";
-        display.textContent = `Mengupload... ${pct}%`;
-      },
-      (err) => {
-        console.error(err);
-        progress.style.display = "none";
-        // Fallback to base64
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          document.getElementById("f-img-url").value = e.target.result;
-          document.getElementById("img-url-display").textContent = "Gambar siap (mode lokal)";
-        };
-        reader.readAsDataURL(file);
-        toast("Upload ke Storage gagal, menggunakan mode lokal.", "info");
-      },
-      async () => {
-        const url = await task.snapshot.ref.getDownloadURL();
-        document.getElementById("f-img-url").value = url;
-        display.textContent = "Upload berhasil!";
-        bar.style.width = "100%";
-        setTimeout(() => { progress.style.display = "none"; }, 1500);
-        toast("Gambar berhasil diupload!", "success");
-      }
-    );
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+    formData.append("folder", "vaultstore/products");
+
+    // Use XHR for progress tracking
+    await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`);
+
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          const pct = Math.round((e.loaded / e.total) * 90);
+          bar.style.width = pct + "%";
+          display.textContent = `Mengupload... ${pct}%`;
+        }
+      };
+
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          const res = JSON.parse(xhr.responseText);
+          const url = res.secure_url;
+          document.getElementById("f-img-url").value = url;
+          bar.style.width = "100%";
+          display.innerHTML = `<span style="color:var(--green);">&#10003; Upload berhasil!</span>`;
+          setTimeout(() => { progress.style.display = "none"; }, 1500);
+          toast("Gambar berhasil diupload!", "success");
+          resolve();
+        } else {
+          reject(new Error("Upload gagal: " + xhr.responseText));
+        }
+      };
+      xhr.onerror = () => reject(new Error("Network error"));
+      xhr.send(formData);
+    });
+
   } catch (e) {
     progress.style.display = "none";
-    toast("Gagal upload: " + e.message, "error");
+    display.textContent = "";
+    console.error(e);
+    toast("Upload gagal: " + e.message + ". Pastikan CLOUDINARY_CLOUD_NAME dan UPLOAD_PRESET sudah diisi.", "error");
   }
 }
 
