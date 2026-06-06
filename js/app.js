@@ -26,6 +26,7 @@ function closeModal(id) {
   const overlay = document.getElementById(id);
   if (overlay) { overlay.classList.remove("open"); document.body.style.overflow = ""; }
 }
+// Close on overlay click
 document.addEventListener("click", (e) => {
   if (e.target.classList.contains("modal-overlay")) {
     e.target.classList.remove("open");
@@ -41,21 +42,21 @@ function hideLoader() {
 
 // ---- Auth State ----
 let currentUser = null;
-let _authReady = false;
+let _authResolved = false;
 
-// Fallback: kalau Firebase tidak respond dalam 6 detik, hide loader paksa
+// Safety timeout: jika Auth tidak resolve dalam 8 detik, paksa hide loader
 const _loaderTimeout = setTimeout(() => {
-  if (!_authReady) {
-    _authReady = true;
+  if (!_authResolved) {
+    _authResolved = true;
     hideLoader();
-    if (typeof onAuthReady === "function") onAuthReady(null);
   }
-}, 6000);
+}, 8000);
 
 auth.onAuthStateChanged(async (user) => {
-  if (_authReady) return;
-  _authReady = true;
-  clearTimeout(_loaderTimeout);
+  if (!_authResolved) {
+    _authResolved = true;
+    clearTimeout(_loaderTimeout);
+  }
   currentUser = user;
   updateNavAuth(user);
   if (typeof onAuthReady === "function") onAuthReady(user);
@@ -88,6 +89,7 @@ async function signInWithGoogle() {
   try {
     const result = await auth.signInWithPopup(googleProvider);
     const user = result.user;
+    // Upsert user document
     await db.collection("users").doc(user.uid).set({
       displayName: user.displayName,
       email: user.email,
@@ -107,14 +109,7 @@ async function signInWithGoogle() {
 async function signOut() {
   await auth.signOut();
   toast("Kamu telah logout.", "info");
-  const path = window.location.pathname;
-  if (path.includes("/pages/owner/")) {
-    window.location.href = "../../index.html";
-  } else if (path.includes("/pages/")) {
-    window.location.href = "../index.html";
-  } else {
-    window.location.href = "index.html";
-  }
+  if (window.location.pathname.includes("owner")) window.location.href = "../index.html";
 }
 
 // ---- Active Nav Link ----
@@ -125,4 +120,4 @@ function setActiveNav() {
     if (path.includes(a.getAttribute("href"))) a.classList.add("active");
   });
 }
-document.addEventListener("DOMContentLoaded", setActiveNav);
+document.addEventListener("DOMContentLoaded", setActiveNav);a
