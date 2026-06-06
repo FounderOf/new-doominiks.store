@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Detail Produk &mdash; VaultStore</title>
-  <link rel="stylesheet" href="./style.css" />
+  <link rel="stylesheet" href="../css/style.css" />
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -96,7 +96,7 @@
         <p style="font-size:14px;color:var(--text-secondary);margin-bottom:4px;">Order ID: <strong id="co-order-id" style="color:var(--gold);"></strong></p>
         <p style="font-size:14px;color:var(--text-secondary);margin-bottom:24px;">Pesanan kamu sedang diproses. Selesaikan pembayaran sesuai instruksi.</p>
         <div id="co-payment-instructions" style="background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-align:left;margin-bottom:24px;font-size:14px;"></div>
-        <a href="./orders.html" class="btn btn-primary btn-lg">Lihat Pesanan Saya &rarr;</a>
+        <a href="orders.html" class="btn btn-primary btn-lg">Lihat Pesanan Saya &rarr;</a>
       </div>
     </div>
   </div>
@@ -119,12 +119,12 @@
 <!-- NAVBAR -->
 <nav class="navbar">
   <div class="nav-inner">
-    <a href="./index.html" class="nav-logo"><div class="logo-mark">V</div>Vault<span>Store</span></a>
+    <a href="../index.html" class="nav-logo"><div class="logo-mark">V</div>Vault<span>Store</span></a>
     <div class="nav-links">
-      <a href="./index.html">Beranda</a>
-      <a href="./catalog.html" class="active">Katalog</a>
-      <a href="./orders.html">Pesanan</a>
-      <a href="./leaderboard.html">Leaderboard</a>
+      <a href="../index.html">Beranda</a>
+      <a href="catalog.html" class="active">Katalog</a>
+      <a href="orders.html">Pesanan</a>
+      <a href="leaderboard.html">Leaderboard</a>
     </div>
     <div class="nav-actions">
       <button class="btn btn-primary btn-sm" id="btn-login" onclick="openModal('modal-login')" style="display:none;">Masuk</button>
@@ -132,8 +132,8 @@
         <div style="display:flex;align-items:center;gap:8px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:6px 12px;">
           <span class="review-avatar" id="nav-avatar" style="width:24px;height:24px;font-size:11px;"></span>
           <span id="nav-username" style="font-size:14px;"></span>
-          <a href="./orders.html" style="font-size:13px;color:var(--text-secondary);margin-left:4px;">&#9776;</a>
-          <a href="./dashboard.html" id="nav-admin-link" style="display:none;color:var(--gold);font-size:13px;">&#9733;</a>
+          <a href="orders.html" style="font-size:13px;color:var(--text-secondary);margin-left:4px;">&#9776;</a>
+          <a href="owner/dashboard.html" id="nav-admin-link" style="display:none;color:var(--gold);font-size:13px;">&#9733;</a>
           <button onclick="signOut()" style="background:none;color:var(--text-muted);font-size:13px;">&#8594;</button>
         </div>
       </div>
@@ -153,8 +153,8 @@
   </div>
 </footer>
 
-<script src="./firebase-config.js"></script>
-<script src="./app.js"></script>
+<script src="../js/firebase-config.js"></script>
+<script src="../js/app.js"></script>
 <script>
 const PAYMENT_METHODS = [
   { id: "bank_transfer_bca", group: "Transfer Bank", name: "BCA Virtual Account", icon: "&#9632;", fee: 4000 },
@@ -180,14 +180,14 @@ const params = new URLSearchParams(window.location.search);
 const productId = params.get("id");
 
 async function loadProduct() {
-  if (!productId) { document.getElementById("product-content").innerHTML = `<div class="empty-state"><h4>Produk tidak ditemukan</h4><a href="./catalog.html" class="btn btn-primary">Kembali ke Katalog</a></div>`; return; }
+  if (!productId) { document.getElementById("product-content").innerHTML = `<div class="empty-state"><h4>Produk tidak ditemukan</h4><a href="catalog.html" class="btn btn-primary">Kembali ke Katalog</a></div>`; return; }
   try {
     const snap = await db.collection("products").doc(productId).get();
     if (!snap.exists) throw new Error("not found");
     productData = { id: snap.id, ...snap.data() };
     renderProduct(productData);
   } catch (e) {
-    document.getElementById("product-content").innerHTML = `<div class="empty-state"><h4>Produk tidak ditemukan</h4><a href="./catalog.html" class="btn btn-primary">Kembali</a></div>`;
+    document.getElementById("product-content").innerHTML = `<div class="empty-state"><h4>Produk tidak ditemukan</h4><a href="catalog.html" class="btn btn-primary">Kembali</a></div>`;
   }
 }
 
@@ -196,8 +196,8 @@ function renderProduct(p) {
   document.title = `${p.name} — VaultStore`;
   document.getElementById("product-content").innerHTML = `
     <div style="margin-bottom:16px;font-size:14px;color:var(--text-secondary);">
-      <a href="./index.html" style="color:var(--text-secondary);">Beranda</a> &rsaquo; 
-      <a href="./catalog.html" style="color:var(--text-secondary);">Katalog</a> &rsaquo; 
+      <a href="../index.html" style="color:var(--text-secondary);">Beranda</a> &rsaquo; 
+      <a href="catalog.html" style="color:var(--text-secondary);">Katalog</a> &rsaquo; 
       <span style="color:var(--text-primary);">${p.name}</span>
     </div>
     <div class="grid-2" style="gap:40px;align-items:start;">
