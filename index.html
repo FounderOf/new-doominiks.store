@@ -114,9 +114,9 @@
     </a>
     <div class="nav-links">
       <a href="index.html" class="active">Beranda</a>
-      <a href="pages/catalog.html">Katalog</a>
-      <a href="pages/orders.html">Pesanan</a>
-      <a href="pages/leaderboard.html">Leaderboard</a>
+      <a href="./catalog.html">Katalog</a>
+      <a href="./orders.html">Pesanan</a>
+      <a href="./leaderboard.html">Leaderboard</a>
     </div>
     <div class="nav-actions">
       <button class="btn btn-primary btn-sm" id="btn-login" onclick="openModal('modal-login')" style="display:none;">
@@ -130,9 +130,9 @@
             &#9660;
           </button>
           <div class="user-dropdown-menu">
-            <a href="pages/orders.html" class="dropdown-item">&#9776; Pesanan Saya</a>
-            <a href="pages/profile.html" class="dropdown-item">&#9998; Profil</a>
-            <a href="pages/owner/dashboard.html" class="dropdown-item" id="nav-admin-link" style="display:none;color:var(--gold);">&#9733; Panel Owner</a>
+            <a href="./orders.html" class="dropdown-item">&#9776; Pesanan Saya</a>
+            <a href="./profile.html" class="dropdown-item">&#9998; Profil</a>
+            <a href="./dashboard.html" class="dropdown-item" id="nav-admin-link" style="display:none;color:var(--gold);">&#9733; Panel Owner</a>
             <div class="dropdown-divider"></div>
             <div class="dropdown-item danger" onclick="signOut()">&#8594; Logout</div>
           </div>
@@ -160,8 +160,8 @@
           Harga terbaik, proses otomatis, transaksi terjamin.
         </p>
         <div class="hero-actions">
-          <a href="pages/catalog.html" class="btn btn-primary btn-lg">Lihat Semua Game</a>
-          <a href="pages/orders.html" class="btn btn-secondary btn-lg">Cek Pesanan</a>
+          <a href="./catalog.html" class="btn btn-primary btn-lg">Lihat Semua Game</a>
+          <a href="./orders.html" class="btn btn-secondary btn-lg">Cek Pesanan</a>
         </div>
         <div class="hero-stats" id="hero-stats">
           <div>
@@ -231,7 +231,7 @@
         <h2 class="section-title">Game <span>Populer</span></h2>
         <p class="section-sub">Top up game favoritmu dengan harga terbaik</p>
       </div>
-      <a href="pages/catalog.html" class="btn btn-secondary btn-sm">Lihat Semua &rarr;</a>
+      <a href="./catalog.html" class="btn btn-secondary btn-sm">Lihat Semua &rarr;</a>
     </div>
     <div class="grid-4" id="products-grid">
       <div class="card" style="grid-column:1/-1;text-align:center;padding:48px;">
@@ -300,7 +300,7 @@
         <h2 class="section-title">Top <span>Pembeli</span></h2>
         <p class="section-sub">Pelanggan dengan transaksi terbanyak bulan ini</p>
       </div>
-      <a href="pages/leaderboard.html" class="btn btn-secondary btn-sm">Lihat Semua &rarr;</a>
+      <a href="./leaderboard.html" class="btn btn-secondary btn-sm">Lihat Semua &rarr;</a>
     </div>
     <div class="grid-2">
       <div class="card" id="lb-preview">
@@ -418,9 +418,9 @@
       <div class="footer-section">
         <h5>Layanan</h5>
         <ul>
-          <li><a href="pages/catalog.html">Semua Produk</a></li>
-          <li><a href="pages/orders.html">Cek Pesanan</a></li>
-          <li><a href="pages/leaderboard.html">Leaderboard</a></li>
+          <li><a href="./catalog.html">Semua Produk</a></li>
+          <li><a href="./orders.html">Cek Pesanan</a></li>
+          <li><a href="./leaderboard.html">Leaderboard</a></li>
           <li><a href="#">Promo & Diskon</a></li>
         </ul>
       </div>
@@ -499,7 +499,7 @@ function buildCategorySlider(categories) {
 }
 
 function filterByCategory(name) {
-  window.location.href = `pages/catalog.html?cat=${encodeURIComponent(name)}`;
+  window.location.href = `./catalog.html?cat=${encodeURIComponent(name)}`;
 }
 
 // Build review slider
@@ -559,7 +559,7 @@ async function loadFeaturedProducts() {
 }
 
 function goProduct(id) {
-  window.location.href = `pages/product.html?id=${id}`;
+  window.location.href = `./product.html?id=${id}`;
 }
 
 // Load stats
