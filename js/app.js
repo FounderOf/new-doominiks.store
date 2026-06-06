@@ -2,6 +2,41 @@
 // MAIN APP UTILITIES
 // ============================================================
 
+// ---- Owner UIDs ----
+// Tambahkan UID owner kamu di sini (dari Firebase Authentication)
+const OWNER_UIDS = window.OWNER_UIDS || [];
+
+function isOwner(uid) {
+  return OWNER_UIDS.includes(uid);
+}
+
+// ---- Format Currency ----
+function formatIDR(amount) {
+  if (typeof amount !== "number" || isNaN(amount)) return "Rp 0";
+  return "Rp " + Math.floor(amount).toLocaleString("id-ID");
+}
+
+// ---- Format Date ----
+function formatDate(val) {
+  if (!val) return "-";
+  let date;
+  if (val && typeof val.toDate === "function") {
+    date = val.toDate();
+  } else if (val && typeof val.toMillis === "function") {
+    date = new Date(val.toMillis());
+  } else if (val instanceof Date) {
+    date = val;
+  } else if (typeof val === "number") {
+    date = new Date(val);
+  } else {
+    return "-";
+  }
+  return date.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+}
+
+// ---- Google Auth Provider ----
+const googleProvider = new firebase.auth.GoogleAuthProvider();
+
 // ---- Toast Notifications ----
 function toast(message, type = "info", duration = 3500) {
   const container = document.getElementById("toast-container");
@@ -95,7 +130,14 @@ async function signInWithGoogle() {
 async function signOut() {
   await auth.signOut();
   toast("Kamu telah logout.", "info");
-  if (window.location.pathname.includes("owner")) window.location.href = "../index.html";
+  const path = window.location.pathname;
+  if (path.includes("/pages/owner/")) {
+    window.location.href = "../../index.html";
+  } else if (path.includes("/pages/")) {
+    window.location.href = "../index.html";
+  } else {
+    window.location.href = "index.html";
+  }
 }
 
 // ---- Active Nav Link ----
