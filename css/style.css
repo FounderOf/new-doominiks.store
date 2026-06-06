@@ -563,4 +563,3 @@ html, body { max-width: 100%; overflow-x: hidden; }
 * { -webkit-overflow-scrolling: touch; }
 /* Slider no-touch-zoom */
 .category-slider-wrap, .review-slide-wrap { touch-action: pan-y; overflow: hidden; }
-
