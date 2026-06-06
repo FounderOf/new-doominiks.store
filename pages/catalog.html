@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Katalog Game &mdash; VaultStore</title>
   <link rel="stylesheet" href="../css/style.css" />
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -86,7 +86,7 @@ let allProducts = [];
 
 async function loadCatalog() {
   try {
-    const snap = await db.collection("products").where("active", "==", true).orderBy("sortOrder").get();
+    const snap = await db.collection("products").where("active", "==", true).get();
     allProducts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     // Build categories
     const cats = [...new Set(allProducts.map(p => p.category).filter(Boolean))];
